@@ -1,0 +1,73 @@
+name: Build bootc image
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 2"
+
+concurrency:
+  group: build-bootc-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6.0.2
+
+      - name: Free runner disk space
+        run: sudo rm -rf /opt/hostedtoolcache
+
+      - name: Normalize image name
+        id: image
+        run: |
+          image_name="${IMAGE_NAME,,}"
+          version_tag="$(sed -n 's|^FROM quay.io/fedora/fedora-silverblue:\([0-9][0-9]*\).*|\1|p' Containerfile | head -n 1)"
+          if [[ -z "${version_tag}" ]]; then
+            echo "Unable to determine Fedora Silverblue version from Containerfile" >&2
+            exit 1
+          fi
+          short_sha="${GITHUB_SHA::12}"
+          echo "name=${image_name}" >> "${GITHUB_OUTPUT}"
+          echo "version_tag=${version_tag}" >> "${GITHUB_OUTPUT}"
+          echo "short_sha=${short_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: redhat-actions/podman-login@v1.7
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2.13
+        with:
+          image: ${{ steps.image.outputs.name }}
+          tags: |
+            ${{ steps.image.outputs.version_tag }}
+            latest
+            sha-${{ steps.image.outputs.short_sha }}
+          archs: amd64
+          layers: true
+          containerfiles: |
+            ./Containerfile
+
+      - name: Push image
+        if: github.event_name != 'pull_request'
+        uses: redhat-actions/push-to-registry@v2.8
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ghcr.io
