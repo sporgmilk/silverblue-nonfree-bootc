@@ -1,0 +1,26 @@
+FROM quay.io/fedora/fedora-silverblue:44
+
+RUN dnf -y install \
+        https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm \
+        https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-44.noarch.rpm; \
+    dnf -y swap ffmpeg-free ffmpeg --allowerasing;\
+    dnf -y group install multimedia \
+        --setopt=install_weak_deps=False \
+        --exclude=PackageKit-gstreamer-plugin \
+        --allowerasing; \
+    dnf -y install openh264 mozilla-openh264 intel-media-driver mesa-va-drivers-freeworld \
+        loupe papers  ; \
+    dnf -y remove gnome-software; \
+    dnf clean all; \
+    rm -rf \
+        /var/cache/swcatalog \
+        /var/cache/dnf \
+        /var/cache/ibus \
+        /var/cache/ldconfig \
+        /var/cache/libdnf5 \
+        /var/lib/dnf \
+        /run/dnf\
+        /var/log/dnf5.log*
+
+RUN bootc container lint
+
