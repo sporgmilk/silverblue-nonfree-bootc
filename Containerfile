@@ -8,9 +8,9 @@ RUN dnf -y install \
         --setopt=install_weak_deps=False \
         --exclude=PackageKit-gstreamer-plugin \
         --allowerasing; \
-    dnf -y install openh264 mozilla-openh264 intel-media-driver mesa-va-drivers-freeworld \
-        loupe papers  ; \
-    dnf -y remove gnome-software; \
+    dnf -y config-manager addrepo --from-repofile=https://dl.winehq.org/wine-builds/fedora/44/winehq.repo; \
+    dnf -y install openh264 intel-media-driver winehq-staging loupe chromium btop ntsync-autoload; \
+    dnf -y remove gnome-software firefox fedora-third-party; \
     dnf clean all; \
     rm -rf \
         /var/cache/swcatalog \
