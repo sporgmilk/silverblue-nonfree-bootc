@@ -12,6 +12,7 @@ concurrency:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
@@ -71,3 +72,28 @@ jobs:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
           registry: ghcr.io
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        run: |
+          COSIGN_VERSION="v2.4.0"
+          curl -sSL -o cosign https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64
+          chmod +x cosign
+          sudo mv cosign /usr/local/bin/
+
+      - name: Sign image with cosign (keyless, OIDC)
+        if: github.event_name != 'pull_request'
+        env:
+          IMAGE: ${{ steps.build-image.outputs.image }}
+          TAGS: ${{ steps.build-image.outputs.tags }}
+        run: |
+          # Sign each pushed tag using keyless signing (requires permissions.id-token = write)
+          # TAGS may contain multiple lines; iterate safely
+          echo "$TAGS" > /tmp/tags.txt
+          while IFS= read -r tag; do
+            tag="$(echo "$tag" | tr -d '[:space:]')"
+            if [ -n "$tag" ]; then
+              echo "Signing $IMAGE:$tag"
+              cosign sign --keyless --yes "$IMAGE:$tag"
+            fi
+          done < /tmp/tags.txt
