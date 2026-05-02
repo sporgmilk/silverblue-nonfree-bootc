@@ -22,6 +22,8 @@ RUN dnf -y install \
         /var/cache/libdnf5 \
         /var/lib/dnf \
         /run/dnf\
+        /tmp/.wget-hpkp_lck_0\
+        /tmp/.wget-hsts_lck_0\
         /var/log/dnf5.log*
 
 RUN bootc container lint
