@@ -22,7 +22,6 @@ RUN dnf -y install \
         /var/cache/libdnf5 \
         /var/lib/dnf \
         /run/dnf\
-        /var/tmp/fonts
         /var/log/dnf5.log*
 
 RUN bootc container lint
