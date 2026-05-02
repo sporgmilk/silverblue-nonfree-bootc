@@ -8,10 +8,8 @@ RUN dnf -y install \
             --setopt=install_weak_deps=False \
             --exclude=PackageKit-gstreamer-plugin \
             --allowerasing; \
-    dnf -y install curl cabextract xorg-x11-font-utils fontconfig
-    curl -L https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm -o\
-        /var/tmp/fonts/msttcore-fonts-installer-2.6-1.noarch.rpm
-        rpm -ivh --nodigest --nofiledigest /var/tmp/fonts/msttcore-fonts-installer-2.6-1.noarch.rpm
+    dnf -y install curl cabextract xorg-x11-font-utils fontconfig; \
+    rpm -ivh --nodigest --nofiledigest https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm; \
     dnf -y config-manager addrepo --from-repofile=https://dl.winehq.org/wine-builds/fedora/44/winehq.repo; \
     dnf -y install openh264 intel-media-driver winehq-staging loupe chromium btop ntsync-autoload flatpak-spawn; \
     dnf -y remove gnome-software firefox fedora-third-party; \
