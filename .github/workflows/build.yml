@@ -3,7 +3,7 @@ name: Build bootc image
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * 2"
+    - cron: "30 5 * * *"
 
 concurrency:
   group: build-bootc-${{ github.ref }}
