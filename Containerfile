@@ -10,7 +10,7 @@ RUN dnf -y install \
             --allowerasing; \
     dnf -y install curl cabextract xorg-x11-font-utils fontconfig; \
     rpm -ivh --nodigest --nofiledigest https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm; \
-    dnf -y install openh264 intel-media-driver wine-core winetricks ntsync-autoload loupe chromium btop flatpak-spawn; \
+    dnf -y install openh264 intel-media-driver wine-core ntsync-autoload loupe chromium btop flatpak-spawn; \
     dnf -y remove firefox fedora-third-party; \
     dnf clean all; \
     rm -rf \
